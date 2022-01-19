@@ -13,20 +13,43 @@
 		
 		<div class="row">
 			<form th:action="@{/employee/books/showbooks}" method="GET">
-				<div class="col-25">
+				<div class="col-15">
 					<Label for="title">Title</Label>
 				</div>
-				<div class="col-75">
-					<input type="text" id="title" name="title">
+				<div class="col-65">
+					<input type="text" id="title" name="title" th:value="${title}">
 				</div> 
 				
-				<div class="col-25">
+				<div class="col-15">
 					<Label for="author">Author</Label>
 				</div>
-				<div class="col-75">
-					<input type="text" id="author" name="author">
+				<div class="col-65">
+					<input type="text" id="author" name="author" th:value="${author}">
 				</div>
+				
+				<label for="numberOfRegistrations">Choose a number of registrations per page:</label>
+				<select th:name="numberOfRegistrations" th:id="numberOfRegistrations">
+					<option th:selected="${numberOfRegistrations=='5'}" th:value="'5'" th:id="5" >5</option>
+					<option th:selected="${numberOfRegistrations=='10'}" th:value="'10'" id="10">10</option>
+					<option th:selected="${numberOfRegistrations=='25'}" th:value="'25'" id="25">25</option>
+					<option th:selected="${numberOfRegistrations=='100'}"th:value="'100'" id="100">100</option>
+				</select>
+				
+				<label for="sortField">Sort by:</label>
+				<select th:name="sortField" th:id="sortField">
+					<option th:selected="${sortField=='title'}" th:value="'title'" th:id="title">Title</option>
+					<option th:selected="${sortField=='author'}"th:value="'author'" th:id="author">Author</option>
+					<!--<option th:selected="${sortField=='email'}" th:value="'email'" th:id="email">E-mail</option>
+					<option th:selected="${sortField=='phoneNumber'}" th:value="'phoneNumber'" th:id="phoneNumber">Phone number</option>-->
+				</select>
+				
+				<label for="sortDirection">Sort Direction:</label>
+				<select th:name="sortDirection" th:id="sortDirection">
+					<option th:selected="${sortDir=='asc'}" th:value="'asc'" th:id="asc" >Ascending</option>
+					<option th:selected="${sortDir=='desc'}"th:value="'desc'" th:id="desc">Descending</option>
+				</select>
 				<div>
+				
 					<input type="submit" value="Search">
 				</div>
 			</form>
@@ -41,7 +64,8 @@
 				<div>
 					<input style="margin-left: 20px" type="submit" value="Add new book">
 				</div>
-			</form>	
+			</form>
+				
 		</div>
 		<br/>
 		<table th:if="${books.size() > 0 }" id="tablestyle">
@@ -90,7 +114,56 @@
 				
 			</tr>
 			
-		</table>		
+		</table>
+		
+	<div th:if="${totalPages > 1}" th:with="pageUrlPostfix = '?sortField=' + ${sortField} + '&sortDir=' + ${sortDir} + '&reverseSortDir=' + ${reverseSortDir} + '&title=' +${title} + '&author=' + ${author} + '&numberOfRegistrations=' + ${numberOfRegistrations}">
+		<nav>
+			<ul class="pagination justify-content-center flex-wrap" th:with="pageUrlPrefix = '/employee/books/showbooks/page/'">
+				<li th:class="${currentPage > 1 ? 'page-item' : 'page-item disabled'}">
+					<a th:href="@{${pageUrlPrefix} + '1' + ${pageUrlPostfix}}" class="page-link">First</a>
+				</li>
+				<li th:class="${currentPage > 1 ? 'page-item' : 'page-item disabled'}">
+					<a th:href="@{${pageUrlPrefix} + ${currentPage - 1} + ${pageUrlPostfix}}" class="page-link">Previous</a>
+				</li>
+				<th:block th:if="${totalPages <= 10}">
+					<li th:each="i: ${#numbers.sequence(1, totalPages)}" th:class="${currentPage != i ? 'page-item' : 'page-item-disabled'}">
+						<a th:href="@{${pageUrlPrefix} + ${i} + ${pageUrlPostfix}}" class="page-link">[[${i}]]</a>
+					</li>
+				</th:block>
+				
+				<th:block th:if="${totalPages > 10}">
+					<th:block th:if="${currentPage <= 5 || currentPage > totalPages - 4}">
+						<li th:each="i: ${#numbers.sequence(1, 5)}" th:class="${currentPage != i ? 'page-item' : 'page-item-disabled'}">
+							<a th:href="@{${pageUrlPrefix} + ${i} + ${pageUrlPostfix}}" class="page-link">[[${i}]]</a>
+						</li>
+						
+						<a th:href="@{${pageUrlPrefix} + 6 + ${pageUrlPostfix}}" class="page-link">...</a>
+						
+						<li th:each="i: ${#numbers.sequence(totalPages-4, totalPages)}" th:class="${currentPage != i ? 'page-item' : 'page-item-disabled'}">
+							<a th:href="@{${pageUrlPrefix} + ${i} + ${pageUrlPostfix}}" class="page-link">[[${i}]]</a>
+						</li>
+					</th:block>
+					
+					<th:block th:if="${currentPage > 5 && currentPage <= totalPages - 4}">
+					
+						<a th:href="@{${pageUrlPrefix} + ${currentPage - 5} + ${pageUrlPostfix}}" class="page-link">...</a>
+						<li th:each="i: ${#numbers.sequence(currentPage-4, currentPage+4)}" th:class="${currentPage != i ? 'page-item' : 'page-item-disabled'}">
+							<a th:href="@{${pageUrlPrefix} + ${i} + ${pageUrlPostfix}}" class="page-link">[[${i}]]</a>
+						</li>
+						<a th:href="@{${pageUrlPrefix} + ${currentPage + 5} + ${pageUrlPostfix}}" class="page-link">...</a>
+					
+					</th:block>
+				</th:block>
+				
+				<li th:class="${currentPage < totalPages ? 'page-item' : 'page-item disabled'}">
+					<a th:href="@{${pageUrlPrefix} + ${currentPage + 1} + ${pageUrlPostfix}}" class="page-link">Next</a>
+				</li>
+				<li th:class="${currentPage < totalPages ? 'page-item' : 'page-item disabled'}">
+					<a th:href="@{${pageUrlPrefix} + ${totalPages} + ${pageUrlPostfix}}" class="page-link">Last</a>
+				</li>
+			</ul>
+		</nav>
+	</div>		
 	</div>
 </body>
 </html>

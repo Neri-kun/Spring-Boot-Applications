@@ -73,34 +73,20 @@ public class EmployeeController {
 				@RequestParam (required=false)String phoneNumber,
 				@RequestParam (required=false)String showAllUsers,
 				@RequestParam (required=false) String numberOfRegistrations
-			) {
+			) {	
 			
-			List<User> users = new ArrayList<User>();
+		if(sortField != null || sortDirection != null || firstName != null || lastName != null || email != null || phoneNumber != null || showAllUsers != null || numberOfRegistrations != null)
+			return showUsersPaginated(model,1,sortField,sortDirection,firstName,lastName,email,phoneNumber,showAllUsers,numberOfRegistrations);
+		else
+		{
+			List<User> users = new ArrayList<User>();		//daca scot partea aia cu modelu, voi intampina probleme.
 			LinkedHashMap<User, BigDecimal> usersAndFines = new LinkedHashMap<User, BigDecimal>();
-			
-			if (showAllUsers != null) { 
-				return showUsersPaginated(model,1,sortField,sortDirection,"","","","",showAllUsers,numberOfRegistrations);
-				
-			}
-			else if (firstName != null || lastName != null || email!=null) { 
-					return showUsersPaginated(model,1,sortField,sortDirection,firstName,lastName,email,phoneNumber,showAllUsers,numberOfRegistrations);
-			}				
 			usersAndFines = fineCalculator.getAllUsersWithFines(users);
 			model.addAttribute("usersWithFines", usersAndFines);
-			return "employee/employee-show-users.html";	
+			return "employee/employee-show-users.html";
 		}
+	}
 		
-		@ModelAttribute("fields")
-		public LinkedHashMap<String,String> getFields(){
-			LinkedHashMap<String,String> list = new LinkedHashMap<String,String>();
-			list.put("First Name","firstName");
-			list.put("Last Name","lastName");
-			list.put("E-mail","email");
-			list.put("Phone number","phoneNumber");
-			System.out.println(list.get("First Name"));
-					
-			return list;
-		}
 		
 		@GetMapping(value="/users/showusers/page/{pageNo}")
 		public String showUsersPaginated(Model model,
@@ -121,38 +107,7 @@ public class EmployeeController {
 			
 			Page<User> page;
 			
-			if(showAllUsers!=null) 
-				page =  userService.findPaginated(pageNumber, pageSize, sortField, sortDir);
-			else if(!firstName.equals("")&&lastName.equals("")&&email.equals("")&&phoneNumber.equals(""))
-				page =  userService.findPaginatedByFirstName(pageNumber, pageSize, sortField, sortDir, firstName);
-			else if(!firstName.equals("")&&!lastName.equals("")&&email.equals("")&&phoneNumber.equals(""))
-				page =  userService.findPaginatedByFirstAndLastName(pageNumber, pageSize, sortField, sortDir, firstName, lastName);
-			else if(!email.equals("")&&firstName.equals("")&&lastName.equals("")&&phoneNumber.equals(""))
-				page = userService.findPaginatedByEmail(pageNumber, pageSize, sortField, sortDir, email);
-			else if(!email.equals("")&&!firstName.equals("")&&lastName.equals("")&&phoneNumber.equals(""))
-				page = userService.findPaginatedByFirstNameAndEmail(pageNumber, pageSize, sortField, sortDir, firstName, email);
-			else if(firstName.equals("")&&!lastName.equals("")&&!email.equals("")&&phoneNumber.equals(""))
-				page = userService.findPaginatedByLastNameAndEmail(pageNumber, pageSize, sortField, sortDir, lastName, email);
-			else if(!firstName.equals("")&&!lastName.equals("")&&!email.equals("")&&phoneNumber.equals(""))
-				page = userService.findPaginatedByFistNameAndLastNameAndEmail(pageNumber, pageSize, sortField, sortDir, firstName, lastName, email);
-			else if(firstName.equals("")&&lastName.equals("")&&email.equals("")&&!phoneNumber.equals(""))
-				page = userService.findPaginatedByPhoneNumber(pageNumber, pageSize, sortField, sortDir, phoneNumber);
-			else if(!firstName.equals("")&&lastName.equals("")&&email.equals("")&&!phoneNumber.equals(""))
-				page = userService.findPaginatedByFirstNameAndPhoneNumber(pageNumber, pageSize, sortField, sortDir, firstName, phoneNumber);
-			else if(firstName.equals("")&&!lastName.equals("")&&email.equals("")&&!phoneNumber.equals(""))
-				page = userService.findPaginatedByLastNameAndPhoneNumber(pageNumber, pageSize, sortField, sortDir, lastName, phoneNumber);
-			else if(firstName.equals("")&&lastName.equals("")&&!email.equals("")&&!phoneNumber.equals(""))
-				page = userService.findPaginatedByEmailAndPhoneNumber(pageNumber, pageSize, sortField, sortDir, email, phoneNumber);
-			else if(!firstName.equals("")&&!lastName.equals("")&&email.equals("")&&!phoneNumber.equals(""))
-				page = userService.findPaginatedByFistNameAndLastNameAndPhoneNumber(pageNumber, pageSize, sortField, sortDir, firstName, lastName, phoneNumber);
-			else if(!firstName.equals("")&&lastName.equals("")&&!email.equals("")&&!phoneNumber.equals(""))
-				page = userService.findPaginatedByFirstNameAndEmailAndPhoneNumber(pageNumber, pageSize, sortField, sortDir, firstName, email, phoneNumber);
-			else if(firstName.equals("")&&!lastName.equals("")&&!email.equals("")&&!phoneNumber.equals(""))
-				page = userService.findPaginatedByLastNameAndEmailAndPhoneNumber(pageNumber, pageSize, sortField, sortDir, lastName, email, phoneNumber);
-			else if(!firstName.equals("")&&!lastName.equals("")&&!email.equals("")&&!phoneNumber.equals(""))
-				page = userService.findPaginatedByAllFilters(pageNumber, pageSize, sortField, sortDir, firstName, lastName, email, phoneNumber);
-			else
-				page =  userService.findPaginatedByLastName(pageNumber, pageSize, sortField, sortDir, lastName);
+			page = userService.findUserByCustomQuerySpecifications(pageNumber, pageSize, sortField, sortDir, firstName, lastName, email, phoneNumber);
 			
 			users = page.getContent();
 			
@@ -205,16 +160,75 @@ public class EmployeeController {
 		}
 	
 		@GetMapping(value="/books/showbooks")
-		public String showBooks(Model model,
+		public String showBooks(//Model model,
+				//@RequestParam (required=false) String title,
+				//@RequestParam (required=false) String author,
+				//@RequestParam (required=false) String showAllBooks) {
+				Model model,
+				@RequestParam(required=false) String sortField,
+				@RequestParam(required=false) String sortDirection,
 				@RequestParam (required=false) String title,
 				@RequestParam (required=false) String author,
-				@RequestParam (required=false) String showAllBooks) {
+				@RequestParam (required=false) String showAllBooks,
+				@RequestParam(required=false) String numberOfRegistrations
+				)
+		{
 			
-			List<Book> books;
-			if (showAllBooks == null) books = bookService.searchBooks(title, author);	
-			else books = bookService.findAll();
+			if(showAllBooks!=null || sortField != null || sortDirection != null || title != null || author != null || numberOfRegistrations != null)
+				return showBooksPaginated(model,1,sortField,sortDirection,title,author,showAllBooks,numberOfRegistrations);
+			else {
+				List<Book> books;
+				if (showAllBooks == null) books = bookService.searchBooks(title, author);	
+				else books = bookService.findAll();
+				
+				model.addAttribute("books", books);
+				return "employee/employee-show-books.html";
+			}
+		}
+		
+		@GetMapping(value="/books/showbooks/page/{pageNo}")
+		public String showBooksPaginated(Model model,
+				@PathVariable (value = "pageNo") int pageNumber,
+				@RequestParam("sortField") String sortField,
+				@RequestParam("sortDir") String sortDir,
+				@RequestParam (required=false) String title,
+				@RequestParam (required=false) String author,
+				@RequestParam (required=false) String showAllBooks,
+				@RequestParam(required=false) String numberOfRegistrations) {
+			
+			int pageSize = Integer.parseInt(numberOfRegistrations);
+			
+			List<Book> books = new ArrayList<Book>();
+			
+			Page<Book> page = bookService.findBookByCustomQuerySpecifications(pageNumber, pageSize, sortField, sortDir, title, author);
+			
+			books = page.getContent();
+			
+			model.addAttribute("currentPage", pageNumber);
+			model.addAttribute("totalPages", page.getTotalPages());
+			model.addAttribute("totalItems", page.getTotalElements());
 			
 			model.addAttribute("books", books);
+			
+			model.addAttribute("title",title);
+			model.addAttribute("author", author);
+			
+			model.addAttribute("sortField", sortField);
+			model.addAttribute("sortDir", sortDir);
+			model.addAttribute("reverseSortDir", sortDir.equals("asc") ? "desc" : "asc");
+			
+			model.addAttribute("numberOfRegistrations", numberOfRegistrations);
+			
+			long startCount = (pageNumber - 1) * bookService.BOOKS_PER_PAGE + 1;
+			model.addAttribute("startCount", startCount);
+				
+			long endCount = startCount + bookService.BOOKS_PER_PAGE - 1;
+			if(endCount > page.getTotalElements()) {
+				endCount = page.getTotalElements();
+			}
+			
+			model.addAttribute("endCount", endCount);
+			
 			return "employee/employee-show-books.html";
 		}
 		

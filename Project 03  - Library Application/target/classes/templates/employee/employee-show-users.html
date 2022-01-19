@@ -62,38 +62,25 @@ crossorigin = "anonymous">-->
 				</div>
 				
 				<label for="numberOfRegistrations">Choose a number of registrations per page:</label>
-				<select name="numberOfRegistrations" id="numberOfRegistrations" onselect="changeFunc();">
-					<option value="5" id="5" >5</option>
-					<option value="10" id="10">10</option>
-					<option value="25" id="25">25</option>
-					<option value="100" id="100">100</option>
+				<select th:name="numberOfRegistrations" th:id="numberOfRegistrations">
+					<option th:selected="${numberOfRegistrations=='5'}" th:value="'5'" th:id="5" >5</option>
+					<option th:selected="${numberOfRegistrations=='10'}" th:value="'10'" id="10">10</option>
+					<option th:selected="${numberOfRegistrations=='25'}" th:value="'25'" id="25">25</option>
+					<option th:selected="${numberOfRegistrations=='100'}"th:value="'100'" id="100">100</option>
 				</select>
 				
 				<label for="sortField">Sort by:</label>
-				<select name="sortField" id="sortField">
-					<option value="firstName" id="firstName" >First Name</option>
-					<option value="lastName" id="lastName">Last Name</option>
-					<option value="email" id="email">E-mail</option>
-					<option value="phoneNumber" id="phoneNumber">Phone number</option>
-				</select>
-				<!--<label for="sortField">Sort by:</label>
 				<select th:name="sortField" th:id="sortField">
-					<div th:if="${sortField==null}">
-						<option th:each="field: ${fields}" th:text="${field.key}" th:value="${field.value}"></option>
-					</div>
-					<div th:if="${sortField=='lastName'}">
-					<option value="lastName" id="lastName">Last Name</option>
-					<option value="firstName" id="firstName" >First Name</option>
-					<option value="lastName" id="lastName">Last Name</option>
-					<option value="email" id="email">E-mail</option>
-					<option value="phoneNumber" id="phoneNumber">Phone number</option>
-					</div>
-				</select>-->
+					<option th:selected="${sortField=='firstName'}" th:value="'firstName'" th:id="firstName">First Name</option>
+					<option th:selected="${sortField=='lastName'}"th:value="'lastName'" th:id="lastName">Last Name</option>
+					<option th:selected="${sortField=='email'}" th:value="'email'" th:id="email">E-mail</option>
+					<option th:selected="${sortField=='phoneNumber'}" th:value="'phoneNumber'" th:id="phoneNumber">Phone number</option>
+				</select>
 				
 				<label for="sortDirection">Sort Direction:</label>
 				<select th:name="sortDirection" th:id="sortDirection">
-					<option th:value="'asc'" th:id="asc" >Ascending</option>
-					<option th:value="'desc'" th:id="desc">Descending</option>
+					<option th:selected="${sortDir=='asc'}" th:value="'asc'" th:id="asc" >Ascending</option>
+					<option th:selected="${sortDir=='desc'}"th:value="'desc'" th:id="desc">Descending</option>
 				</select>
 				
 				<div>

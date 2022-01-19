@@ -41,7 +41,8 @@ public class LibraryApplication {
 	@Bean
 	CommandLineRunner runner() {
 		return args -> {
-		
+			midAppRef.midnightApplicationRefresher();
+			
 			/*User user1 = new User("admin", pwEncoder.encode("test"), "martijn.reede@gmail.com", "Martijn", "Reede", "Huizumerlaan 158", "06-11433823", "Amsterdam");
 			user1.setRole("ROLE_ADMIN");
 			
@@ -168,7 +169,6 @@ public class LibraryApplication {
 			bookService.save(book4);
 			
 			userService.save(user22);*/
-			midAppRef.midnightApplicationRefresher();	
 		};
 	}
 }

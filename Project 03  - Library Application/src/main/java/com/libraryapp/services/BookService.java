@@ -6,12 +6,19 @@ import java.util.Collection;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import com.libraryapp.DAO.BookRepository;
 import com.libraryapp.DAO.UserRepository;
 import com.libraryapp.entities.Book;
 import com.libraryapp.entities.User;
+import com.libraryapp.specifications.BookSpecifications;
+import com.libraryapp.specifications.UserSpecifications;
 
 @Service
 public class BookService {
@@ -21,6 +28,8 @@ public class BookService {
 	
 	@Autowired
 	UserRepository userRepo;
+	
+	public static final int BOOKS_PER_PAGE = 5;
 	
 	public void save(Book book) {
 		bookRepo.save(book);
@@ -162,4 +171,20 @@ public class BookService {
 			userRepo.save(user);
 		}
 	}
+	
+	public Pageable getPagination(String sortField, String sortDirection, int pageNumber, int pageSize) {
+		
+		Sort sort = sortDirection.equalsIgnoreCase(Sort.Direction.ASC.name()) ? Sort.by(sortField).ascending() : Sort.by(sortField).descending();
+		PageRequest pageable = PageRequest.of(pageNumber - 1 , pageSize,sort);
+		return (Pageable) pageable;
+	}
+	
+	public Page<Book> findBookByCustomQuerySpecifications(int pageNumber, int pageSize, String sortField, String sortDirection,
+			String title, String author){
+
+		Specification <Book> specs = Specification.where(BookSpecifications.likeTitle(title).
+				and(BookSpecifications.likeAuthor(author)));
+		return bookRepo.findAll(specs, getPagination(sortField,sortDirection,pageNumber,pageSize));
+	}
+	
 }

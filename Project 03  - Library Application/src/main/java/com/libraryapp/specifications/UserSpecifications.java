@@ -27,5 +27,21 @@ public final class UserSpecifications {
 		};
 	}
 	
+	public static Specification<User> likeEmail(String email) {
+		if (email == null) {
+			return null;
+		}
+		return (root, query, cb) -> {
+			return cb.like(root.get("email"),  email + "%");
+		};
+	}
 	
+	public static Specification<User> likePhoneNumber(String phoneNumber) {
+		if (phoneNumber == null) {
+			return null;
+		}
+		return (root, query, cb) -> {
+			return cb.like(root.get("phoneNumber"),  phoneNumber + "%");
+		};
+	}
 }
