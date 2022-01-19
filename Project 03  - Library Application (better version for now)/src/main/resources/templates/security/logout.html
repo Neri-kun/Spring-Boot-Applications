@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="ISO-8859-1">
+<title>Logout</title>
+<link rel="stylesheet" type="text/css" th:href="@{/CSS/security-layout.css}">
+</head>
+<body>
+	
+	 
+    	
+    	<div class="wrapperLogout">
+	  		<div class="containerLogout">
+	  			<p>Are you sure you want to log out?</p>
+	  			<form th:action="@{/logout}" method="post">
+    	 			<input class="logoutButton" type="submit" value="Logout"/>
+    	 		</form>
+    	 		<!-- <form>
+ 					<input class="logoutButton" type="submit" value="Go Back From Whence You Came!" onclick="history.back(-1)" />
+				</form>  -->
+ 			</div>
+ 		</div>
+ 	
+</body>
+</html>
