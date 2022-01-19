@@ -1,0 +1,18 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Project_03__-_Library_Application
+Bundle-SymbolicName: Project_03__-_Library_Application
+Bundle-Version: 1.0.0.qualifier
+Bundle-ClassPath: Project 03  - Library Application.jar,
+ nerem/.m2/repository/org/projectlombok/lombok/1.18.16/lombok-1.18.16.jar
+Automatic-Module-Name: Project.03.Library.Application
+Bundle-RequiredExecutionEnvironment: JavaSE-16
+Export-Package: com.libraryapp,
+ com.libraryapp.DAO,
+ com.libraryapp.controllers,
+ com.libraryapp.entities,
+ com.libraryapp.searchcriteria,
+ com.libraryapp.security,
+ com.libraryapp.services,
+ com.libraryapp.specifications,
+ com.libraryapp.utils
