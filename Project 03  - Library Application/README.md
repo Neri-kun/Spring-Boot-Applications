@@ -5,6 +5,8 @@ into practice. Moreover, this application served as a project for a class ,,Proj
 
 For further details, please consult the documentation on **Final Report.pdf**
 
+P.S : I know it might take a while since this application and documentation is a work of progress, but I am trying to improve it whenever I have the time :)
+
 
 
 
