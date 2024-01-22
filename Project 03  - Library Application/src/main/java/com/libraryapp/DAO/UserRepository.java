@@ -4,7 +4,6 @@ import java.util.List;
 
 
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -42,9 +41,6 @@ public interface UserRepository extends  JpaRepository<User, Long>, JpaSpecifica
 	@Query("SELECT u FROM User u WHERE u.lastName LIKE ?1% AND u.phoneNumber LIKE ?2%")
 	public Page<User> findByLastNameAndPhoneNumber(String lastName, String phoneNumber, Pageable pageable);
 	
-	/*@Query("SELECT u FROM User u WHERE u.firstName LIKE ?1% AND u.phoneNumber LIKE ?2%")
-	public Page<User> findByFirstNameAndPhoneNumber(String firstName, String phoneNumber, Pageable pageable);*/
-	
 	@Query("SELECT u FROM User u WHERE u.lastName LIKE ?1%")
 	public Page<User> findByLastName(String lastName, Pageable pageable);
 	
@@ -74,5 +70,4 @@ public interface UserRepository extends  JpaRepository<User, Long>, JpaSpecifica
 	
 	@Query("SELECT u FROM User u WHERE u.firstName LIKE ?1% AND u.lastName LIKE ?2% AND u.email LIKE ?3% AND u.phoneNumber LIKE ?4%")
 	public Page<User> findByAllFilters(String firstName, String lastName, String email, String phoneNumber, Pageable pageable);
-	//Page<User> findByTitleContaining(String title, Pageable pageable);
 }
