@@ -18,7 +18,6 @@ import com.libraryapp.DAO.UserRepository;
 import com.libraryapp.entities.Book;
 import com.libraryapp.entities.User;
 import com.libraryapp.specifications.BookSpecifications;
-import com.libraryapp.specifications.UserSpecifications;
 
 @Service
 public class BookService {
@@ -50,13 +49,13 @@ public class BookService {
 	
 	public List<Book> searchBooks(String title, String author){
 		
-		List<Book> searchedBooks = new ArrayList<Book>();
+		List<Book> searchedBooks;
 		
 		if (title != null && author == null) {
 			searchedBooks = getByTitle(title);
 		} else if (title == null && author != null) {
 			searchedBooks = getByAuthor(author);
-		} else if (title != null && author != null) {
+		} else{
 			searchedBooks = getByTitleAndAuthor(title, author);
 		} 
 		
