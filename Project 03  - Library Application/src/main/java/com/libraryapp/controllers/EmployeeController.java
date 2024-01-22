@@ -10,12 +10,10 @@ import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -55,6 +53,21 @@ public class EmployeeController {
 	@Autowired
 	ListInStringConverter listConverter;
 	
+	@Autowired
+	private static final String USERS_ATTRIBUTE = "users";
+	
+	@Autowired
+	private static final String TITLE_ATTRIBUTE = "title";
+	
+	@Autowired
+	private static final String AUTHOR_ATTRIBUTE = "author";
+	
+	@Autowired
+	private static final String SELECTED_BOOK_IDS_ATTRIBUTE = "selectedBookIds";
+	
+	@Autowired
+	private static final String SELECTED_BOOKS_ATTRIBUTE = "selectedBooks";
+	
 		@GetMapping
 		public String employeeHomePage(Model model) {
 			long currentUserId = currentUserFinder.getCurrentUserId();
@@ -78,10 +91,8 @@ public class EmployeeController {
 		if(sortField != null || sortDirection != null || firstName != null || lastName != null || email != null || phoneNumber != null || showAllUsers != null || numberOfRegistrations != null)
 			return showUsersPaginated(model,1,sortField,sortDirection,firstName,lastName,email,phoneNumber,showAllUsers,numberOfRegistrations);
 		else
-		{
-			List<User> users = new ArrayList<User>();		//daca scot partea aia cu modelu, voi intampina probleme.
-			LinkedHashMap<User, BigDecimal> usersAndFines = new LinkedHashMap<User, BigDecimal>();
-			usersAndFines = fineCalculator.getAllUsersWithFines(users);
+		{	
+			LinkedHashMap<User, BigDecimal> usersAndFines = fineCalculator.getAllUsersWithFines(new ArrayList<>());
 			model.addAttribute("usersWithFines", usersAndFines);
 			return "employee/employee-show-users.html";
 		}
@@ -102,21 +113,19 @@ public class EmployeeController {
 			
 			int pageSize = Integer.parseInt(numberOfRegistrations);
 			
-			List<User> users = new ArrayList<User>();
-			LinkedHashMap<User, BigDecimal> usersWithFines = new LinkedHashMap<User, BigDecimal>();
 			
 			Page<User> page;
 			
 			page = userService.findUserByCustomQuerySpecifications(pageNumber, pageSize, sortField, sortDir, firstName, lastName, email, phoneNumber);
 			
-			users = page.getContent();
+			List<User> users = page.getContent();
 			
 			model.addAttribute("currentPage", pageNumber);
 			model.addAttribute("totalPages", page.getTotalPages());
 			model.addAttribute("totalItems", page.getTotalElements());
 			
-			usersWithFines = fineCalculator.getAllUsersWithFines(users);
-			model.addAttribute("users", users);
+			LinkedHashMap<User, BigDecimal> usersWithFines = fineCalculator.getAllUsersWithFines(users);
+			model.addAttribute(USERS_ATTRIBUTE, users);
 			model.addAttribute("usersWithFines", usersWithFines);
 			
 			model.addAttribute("sortField", sortField);
@@ -131,10 +140,10 @@ public class EmployeeController {
 			model.addAttribute("numberOfRegistrations", numberOfRegistrations);
 			
 
-			long startCount = (pageNumber - 1) * userService.USERS_PER_PAGE + 1;
+			long startCount = (pageNumber - 1) * UserService.USERS_PER_PAGE + 1;
 			model.addAttribute("startCount", startCount);
 				
-			long endCount = startCount + userService.USERS_PER_PAGE - 1;
+			long endCount = startCount + UserService.USERS_PER_PAGE - 1;
 			if(endCount > page.getTotalElements()) {
 				endCount = page.getTotalElements();
 			}
@@ -160,10 +169,7 @@ public class EmployeeController {
 		}
 	
 		@GetMapping(value="/books/showbooks")
-		public String showBooks(//Model model,
-				//@RequestParam (required=false) String title,
-				//@RequestParam (required=false) String author,
-				//@RequestParam (required=false) String showAllBooks) {
+		public String showBooks(
 				Model model,
 				@RequestParam(required=false) String sortField,
 				@RequestParam(required=false) String sortDirection,
@@ -174,13 +180,14 @@ public class EmployeeController {
 				)
 		{
 			
-			if(showAllBooks!=null || sortField != null || sortDirection != null || title != null || author != null || numberOfRegistrations != null)
-				return showBooksPaginated(model,1,sortField,sortDirection,title,author,showAllBooks,numberOfRegistrations);
+			if(showAllBooks != null || title !=null || author != null || sortField != null || sortDirection != null || numberOfRegistrations != null) {
+				if(showAllBooks != null)
+					return showBooksPaginated(model,1,sortField,sortDirection,"","",numberOfRegistrations);
+				else
+					return showBooksPaginated(model,1,sortField,sortDirection,title,author,numberOfRegistrations);
+			}
 			else {
-				List<Book> books;
-				if (showAllBooks == null) books = bookService.searchBooks(title, author);	
-				else books = bookService.findAll();
-				
+				List<Book> books = new ArrayList<Book>();
 				model.addAttribute("books", books);
 				return "employee/employee-show-books.html";
 			}
@@ -193,16 +200,14 @@ public class EmployeeController {
 				@RequestParam("sortDir") String sortDir,
 				@RequestParam (required=false) String title,
 				@RequestParam (required=false) String author,
-				@RequestParam (required=false) String showAllBooks,
-				@RequestParam(required=false) String numberOfRegistrations) {
+				@RequestParam (required=false) String numberOfRegistrations) {
 			
 			int pageSize = Integer.parseInt(numberOfRegistrations);
 			
-			List<Book> books = new ArrayList<Book>();
 			
 			Page<Book> page = bookService.findBookByCustomQuerySpecifications(pageNumber, pageSize, sortField, sortDir, title, author);
 			
-			books = page.getContent();
+			List <Book> books = page.getContent();
 			
 			model.addAttribute("currentPage", pageNumber);
 			model.addAttribute("totalPages", page.getTotalPages());
@@ -210,8 +215,8 @@ public class EmployeeController {
 			
 			model.addAttribute("books", books);
 			
-			model.addAttribute("title",title);
-			model.addAttribute("author", author);
+			model.addAttribute(TITLE_ATTRIBUTE,title);
+			model.addAttribute(AUTHOR_ATTRIBUTE, author);
 			
 			model.addAttribute("sortField", sortField);
 			model.addAttribute("sortDir", sortDir);
@@ -219,10 +224,10 @@ public class EmployeeController {
 			
 			model.addAttribute("numberOfRegistrations", numberOfRegistrations);
 			
-			long startCount = (pageNumber - 1) * bookService.BOOKS_PER_PAGE + 1;
+			long startCount = (pageNumber - 1) * BookService.BOOKS_PER_PAGE + 1;
 			model.addAttribute("startCount", startCount);
 				
-			long endCount = startCount + bookService.BOOKS_PER_PAGE - 1;
+			long endCount = startCount + BookService.BOOKS_PER_PAGE - 1;
 			if(endCount > page.getTotalElements()) {
 				endCount = page.getTotalElements();
 			}
@@ -256,8 +261,8 @@ public class EmployeeController {
 											Model model) {
 			Book book = bookService.findById(deleteBookId);
 			model.addAttribute("deleteBook", book);
-			model.addAttribute("title", title);
-			model.addAttribute("author", author);
+			model.addAttribute(TITLE_ATTRIBUTE, title);
+			model.addAttribute(AUTHOR_ATTRIBUTE, author);
 			return "employee/employee-delete-book.html";
 		}
 		
@@ -321,16 +326,18 @@ public class EmployeeController {
 			List<Book> selectedBookObjects = bookService.convertIdsCollectionToBooksList(selectedBookIds);
 
 			model.addAttribute("selectedBookObjects", selectedBookObjects);
-			model.addAttribute("selectedBookIds", selectedBookIds);
-			model.addAttribute("title", title);
-			model.addAttribute("author", author);
+			model.addAttribute(SELECTED_BOOK_IDS_ATTRIBUTE, selectedBookIds);
+			model.addAttribute(TITLE_ATTRIBUTE, title);
+			model.addAttribute(AUTHOR_ATTRIBUTE, author);
 			model.addAttribute("searchedBooks", searchedBooks);
-			model.addAttribute("users", usersAndFines);
+			model.addAttribute(USERS_ATTRIBUTE, usersAndFines);
 			model.addAttribute("userId", userId);
 			model.addAttribute("user", user);
 			
 			return "employee/employee-orders.html";
 		}
+		
+		
 		
 		@GetMapping(value="/confirmorder")
 		public String confirmOrder(@RequestParam String selectedBookIdsInString,
@@ -340,9 +347,9 @@ public class EmployeeController {
 			List<Book> selectedBooks = bookService.convertIdsCollectionToBooksList(selectedBookIds);
 			User user = userService.findById(userId);
 			
-			model.addAttribute("selectedBookIds", selectedBookIds);
+			model.addAttribute(SELECTED_BOOK_IDS_ATTRIBUTE, selectedBookIds);
 			model.addAttribute("user", user);
-			model.addAttribute("selectedBooks", selectedBooks);
+			model.addAttribute(SELECTED_BOOKS_ATTRIBUTE, selectedBooks);
 			
 			return "employee/employee-confirm-order.html";
 		}
@@ -387,11 +394,11 @@ public class EmployeeController {
 			LinkedHashMap<Book, BigDecimal> selectedBooks = fineCalculator.getBooksWithFines(bookService.convertIdsCollectionToBooksList(selectedBookIds));
 			BigDecimal fineToPay = fineCalculator.getTotalFine(bookService.convertIdsCollectionToBooksList(selectedBookIds));
 			
-			model.addAttribute("selectedBookIds", selectedBookIds);
+			model.addAttribute(SELECTED_BOOK_IDS_ATTRIBUTE, selectedBookIds);
 			model.addAttribute("fineToPay", fineToPay);
-			model.addAttribute("selectedBooks", selectedBooks);
+			model.addAttribute(SELECTED_BOOKS_ATTRIBUTE, selectedBooks);
 			model.addAttribute("booksInUseByUser", booksInUseByUser);
-			model.addAttribute("users", users);
+			model.addAttribute(USERS_ATTRIBUTE, users);
 			model.addAttribute("user", user);
 			model.addAttribute("firstName", firstName);
 			model.addAttribute("lastName", lastName);
@@ -407,8 +414,8 @@ public class EmployeeController {
 			Set<Long> selectedBookIds = listConverter.convertListInStringToSetInLong(selectedBookIdsInString);
 			List<Book> selectedBooks = bookService.convertIdsCollectionToBooksList(selectedBookIds);
 						
-			model.addAttribute("selectedBooks", selectedBooks);
-			model.addAttribute("selectedBookIds", selectedBookIds);
+			model.addAttribute(SELECTED_BOOKS_ATTRIBUTE, selectedBooks);
+			model.addAttribute(SELECTED_BOOK_IDS_ATTRIBUTE, selectedBookIds);
 			model.addAttribute("user", userService.findById(userId));
 			model.addAttribute("fineToPay", fineToPay);
 			return "employee/employee-confirm-returned-books.html";

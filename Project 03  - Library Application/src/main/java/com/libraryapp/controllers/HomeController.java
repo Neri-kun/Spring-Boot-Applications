@@ -1,6 +1,5 @@
 package com.libraryapp.controllers;
 
-import java.util.ArrayList;
 import java.util.Collection;
 
 import org.springframework.security.core.GrantedAuthority;
@@ -16,8 +15,7 @@ public class HomeController {
 	public String redirectToHome() {
 		
 		UserDetails principal = (UserDetails)SecurityContextHolder.getContext().getAuthentication().getPrincipal();	  
-		Collection<? extends GrantedAuthority> role = new ArrayList<>();
-		role = principal.getAuthorities();
+		Collection<? extends GrantedAuthority> role = principal.getAuthorities();
 		
 		if (role.toString().equals("[ROLE_ADMIN]")){
 			return "redirect:/admin";
